@@ -32,7 +32,8 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (usuarioRepository.count() > 0) {
-            log.info("DataInitializer: banco já populado — seed ignorado.");
+            log.info("DataInitializer: banco já populado — verificando incremento...");
+            incrementarNovosFunc();
             return;
         }
 
@@ -192,6 +193,43 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.count(), funcionarioRepository.count(),
             registroPontoRepository.count(), notificacaoRepository.count(),
             compensacaoFolgaRepository.count());
+    }
+
+    // ── Incremento — adiciona novos funcionários se ainda não existirem ─────────
+
+    private void incrementarNovosFunc() {
+        boolean adicionou = false;
+
+        if (!funcionarioRepository.existsByEmail("mariana.costa@empresa.com")) {
+            Funcionario mariana = func("Mariana Costa", "Analista de RH", "mariana.costa@empresa.com", "08:00", "17:00");
+            banco(mariana, 600);
+            pontoSemSaida(mariana, StatusRegistro.PENDENTE, true, "08:00-17:00", "Falta de entrada em 18/03 - Sugestão da IA");
+            adicionou = true;
+        }
+        if (!funcionarioRepository.existsByEmail("felipe.santos@empresa.com")) {
+            Funcionario felipe = func("Felipe Santos", "Dev Júnior", "felipe.santos@empresa.com", "09:00", "18:00");
+            banco(felipe, 480);
+            pontoSemSaida(felipe, StatusRegistro.PENDENTE, true, null, "Solicitação de folga compensatória em 02/04");
+            adicionou = true;
+        }
+        if (!funcionarioRepository.existsByEmail("lucas.teixeira@empresa.com")) {
+            Funcionario lucas = func("Lucas Teixeira", "QA Engineer", "lucas.teixeira@empresa.com", "09:00", "18:00");
+            banco(lucas, 900);
+            pontoSemSaida(lucas, StatusRegistro.PENDENTE, true, "17:30", "Falta de saída em 20/03 - Sugestão da IA: 17:30");
+            adicionou = true;
+        }
+        if (!funcionarioRepository.existsByEmail("beatriz.rocha@empresa.com")) {
+            Funcionario beatriz = func("Beatriz Rocha", "Designer", "beatriz.rocha@empresa.com", "09:00", "18:00");
+            banco(beatriz, 720);
+            pontoSemSaida(beatriz, StatusRegistro.PENDENTE, true, "09:00-18:00", "Falta de entrada em 21/03 - Sugestão da IA: 09:00-18:00");
+            adicionou = true;
+        }
+
+        if (adicionou) {
+            log.info("DataInitializer: novos funcionários adicionados ao banco existente.");
+        } else {
+            log.info("DataInitializer: nenhum incremento necessário.");
+        }
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
