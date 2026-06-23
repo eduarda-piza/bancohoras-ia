@@ -1,8 +1,10 @@
 package com.bancohoras.controller;
 
 import com.bancohoras.model.BancoHoras;
+import com.bancohoras.model.Notificacao;
 import com.bancohoras.model.RegistroPonto;
 import com.bancohoras.repository.BancoHorasRepository;
+import com.bancohoras.repository.NotificacaoRepository;
 import com.bancohoras.repository.RegistroPontoRepository;
 import com.bancohoras.repository.UsuarioRepository;
 import com.bancohoras.service.NotificacaoService;
@@ -27,16 +29,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AlertaController {
 
-    private final NotificacaoService     notificacaoService;
-    private final UsuarioRepository      usuarioRepository;
-    private final BancoHorasRepository   bancoHorasRepository;
+    private final NotificacaoService      notificacaoService;
+    private final NotificacaoRepository   notificacaoRepository;
+    private final UsuarioRepository       usuarioRepository;
+    private final BancoHorasRepository    bancoHorasRepository;
     private final RegistroPontoRepository registroPontoRepository;
 
     @GetMapping
     public String listar(@AuthenticationPrincipal UserDetails user, Model model) {
-        usuarioRepository.findByEmail(user.getUsername()).ifPresent(u -> {
-            model.addAttribute("notificacoes", notificacaoService.listarTodas(u.getId()));
+        // Todas as notificações, independente do usuário logado
+        List<Notificacao> notificacoes = notificacaoRepository.findAll();
+        notificacoes.sort((a, b) -> {
+            if (a.getDataCriacao() == null) return 1;
+            if (b.getDataCriacao() == null) return -1;
+            return b.getDataCriacao().compareTo(a.getDataCriacao());
         });
+        model.addAttribute("notificacoes", notificacoes);
 
         // Horas a vencer: saldo > 1200 min (>20h)
         List<BancoHoras> horasVencer = bancoHorasRepository.findCriticosWithFuncionario(1200);
@@ -57,6 +65,7 @@ public class AlertaController {
         model.addAttribute("horasVencer",      horasVencer);
         model.addAttribute("diasRestantesMap", diasRestantesMap);
         model.addAttribute("excessoJornada",   excessoJornada);
+        model.addAttribute("excessos",         excessoJornada);
         model.addAttribute("pageTitle",        "Alertas");
         return "alertas";
     }

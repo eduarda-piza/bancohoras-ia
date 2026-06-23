@@ -31,9 +31,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        log.info("=== DataInitializer executando ===");
         if (usuarioRepository.count() > 0) {
             log.info("DataInitializer: banco já populado — verificando incremento...");
             incrementarNovosFunc();
+            criarNotificacoesSeNecessario();
             return;
         }
 
@@ -230,6 +232,51 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             log.info("DataInitializer: nenhum incremento necessário.");
         }
+    }
+
+    // ── Notificações — cria apenas se não existirem ──────────────────────────────
+
+    private void criarNotificacoesSeNecessario() {
+        if (notificacaoRepository.count() > 0) {
+            log.info("DataInitializer: notificações já existem — ignorado.");
+            return;
+        }
+
+        Usuario gestor = usuarioRepository.findByEmail("carlos.mendes@empresa.com")
+            .orElseGet(() -> usuarioRepository.findAll().stream()
+                .filter(u -> u.getPerfil().getNome().equals("GESTOR"))
+                .findFirst()
+                .orElse(usuarioRepository.findAll().get(0)));
+
+        Notificacao n1 = new Notificacao();
+        n1.setDestinatario(gestor);
+        n1.setTipo(TipoNotificacao.VENCIMENTO);
+        n1.setMensagem("Rafael Souza tem 48h vencendo em 12 dias. Melhor janela para folga compensatória: 31/03 a 04/04.");
+        n1.setLida(false);
+        notificacaoRepository.save(n1);
+
+        Notificacao n2 = new Notificacao();
+        n2.setDestinatario(gestor);
+        n2.setTipo(TipoNotificacao.EXCESSO_JORNADA);
+        n2.setMensagem("Ana Lima ultrapassou 10h hoje. Recomendado encerrar ponto e acionar o RH.");
+        n2.setLida(false);
+        notificacaoRepository.save(n2);
+
+        Notificacao n3 = new Notificacao();
+        n3.setDestinatario(gestor);
+        n3.setTipo(TipoNotificacao.VENCIMENTO);
+        n3.setMensagem("Pedro Alves tem 32h vencendo em 28 dias.");
+        n3.setLida(false);
+        notificacaoRepository.save(n3);
+
+        Notificacao n4 = new Notificacao();
+        n4.setDestinatario(gestor);
+        n4.setTipo(TipoNotificacao.RESUMO_SEMANAL);
+        n4.setMensagem("Resumo semanal: 2 excessos detectados, 3 funcionários em zona crítica.");
+        n4.setLida(false);
+        notificacaoRepository.save(n4);
+
+        log.info("=== 4 notificações criadas com sucesso ===");
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

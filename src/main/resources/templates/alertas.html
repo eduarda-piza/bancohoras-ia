@@ -161,20 +161,20 @@
           Nenhuma notificação encontrada.
         </div>
 
-        <div th:each="n : ${notificacoes}" class="bh-alert-item"
-             th:classappend="${n.lida} ? 'opacity-75'">
-          <div th:classappend="${n.lida} ? 'lida'" class="bh-alert-dot mt-1 flex-shrink-0"></div>
+        <div th:each="notificacao : ${notificacoes}" class="bh-alert-item"
+             th:classappend="${notificacao.lida} ? 'opacity-75'">
+          <div th:classappend="${notificacao.lida} ? 'lida'" class="bh-alert-dot mt-1 flex-shrink-0"></div>
           <div class="bh-alert-body flex-grow-1">
             <div class="d-flex align-items-start justify-content-between gap-2">
               <div>
                 <span class="badge text-bg-secondary mb-1" style="font-size:.65rem;"
-                      th:text="${n.tipo}">TIPO</span>
-                <div class="bh-alert-msg" th:text="${n.mensagem}">Mensagem</div>
+                      th:text="${notificacao.tipo}">TIPO</span>
+                <div class="bh-alert-msg" th:text="${notificacao.mensagem}">Mensagem</div>
                 <div class="bh-alert-time"
-                     th:text="${#temporals.format(n.dataCriacao, 'dd/MM/yyyy HH:mm')}">00/00/0000</div>
+                     th:text="${notificacao.dataCriacao != null ? #temporals.format(notificacao.dataCriacao, 'dd/MM/yyyy HH:mm') : '—'}">00/00/0000</div>
               </div>
-              <div th:if="${!n.lida}">
-                <form th:action="@{/alertas/{id}/marcar-lida(id=${n.id})}" method="post">
+              <div th:if="${!notificacao.lida}">
+                <form th:action="@{/alertas/{id}/marcar-lida(id=${notificacao.id})}" method="post">
                   <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                   <button type="submit" class="btn btn-sm btn-outline-primary py-0 px-2"
                           style="font-size:.75rem;">
