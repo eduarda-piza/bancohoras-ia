@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<header th:fragment="header" class="navbar navbar-dark bg-primary sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            &#128337; Banco de Horas
+        </a>
+
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white" sec:authentication="name">Usuário</span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">Sair</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<footer th:fragment="footer" class="footer bg-light border-top py-3 mt-auto">
+    <div class="container-fluid text-center text-muted">
+        <small>
+            &copy; <span th:text="${#dates.year(#dates.createNow())}">2024</span>
+            Banco de Horas com IA &mdash; Todos os direitos reservados
+        </small>
+    </div>
+</footer>
+
+</html>

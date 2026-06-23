@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<nav th:fragment="sidebar" class="sidebar bg-dark text-white p-3" style="min-height: calc(100vh - 56px); width: 250px;">
+    <ul class="nav flex-column gap-1">
+        <li class="nav-item">
+            <a class="nav-link text-white" th:href="@{/dashboard}">
+                &#128200; Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" th:href="@{/lancamentos}">
+                &#128336; Lançamentos
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" th:href="@{/relatorios}">
+                &#128203; Relatórios
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('GESTOR') or hasRole('ADMIN')">
+            <a class="nav-link text-white" th:href="@{/gestao}">
+                &#128101; Gestão de Equipe
+            </a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+            <a class="nav-link text-white" th:href="@{/admin}">
+                &#9881; Administração
+            </a>
+        </li>
+        <li class="nav-item mt-3">
+            <a class="nav-link text-info" th:href="@{/ia/sugestoes}">
+                &#129302; Sugestões da IA
+            </a>
+        </li>
+    </ul>
+</nav>
+
+</html>

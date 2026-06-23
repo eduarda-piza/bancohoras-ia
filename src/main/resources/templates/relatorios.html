@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Relatórios · BancoHoras</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="bh-layout">
+
+  <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+  <div class="bh-main">
+    <div th:replace="~{fragments/layout :: topbar('Relatórios')}"></div>
+
+    <main class="bh-content">
+
+      <!-- Sumário executivo -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+          <div class="bh-card text-center">
+            <div class="bh-metric-icon mx-auto" style="background:#eff6ff;">
+              <i class="bi bi-people-fill text-primary"></i>
+            </div>
+            <div class="bh-metric-value" th:text="${#lists.size(equipe)}">0</div>
+            <div class="bh-metric-label">Total Funcionários</div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="bh-card text-center">
+            <div class="bh-metric-icon mx-auto" style="background:#fef2f2;">
+              <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+            </div>
+            <div class="bh-metric-value text-danger" th:text="${totalCriticos}">0</div>
+            <div class="bh-metric-label">Saldos Críticos</div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="bh-card text-center">
+            <div class="bh-metric-icon mx-auto" style="background:#f0fdf4;">
+              <i class="bi bi-bar-chart-fill text-success"></i>
+            </div>
+            <div class="bh-metric-value text-success" th:text="${totalSaldoHoras} + 'h'">0h</div>
+            <div class="bh-metric-label">Total Saldo Equipe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela consolidada -->
+      <div class="bh-table-card">
+        <div class="bh-table-header">
+          <span class="bh-table-title">
+            <i class="bi bi-file-earmark-bar-graph me-1 text-primary"></i>Consolidado de Saldos
+          </span>
+          <span class="text-muted small" th:text="'Atualizado em ' + ${#temporals.format(agora, 'dd/MM/yyyy HH:mm')}">—</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Funcionário</th>
+                <th>Cargo</th>
+                <th>Jornada Diária</th>
+                <th>Saldo (min)</th>
+                <th>Saldo (horas)</th>
+                <th>Vencimento</th>
+                <th>Criticidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:if="${#lists.isEmpty(equipe)}">
+                <td colspan="8" class="text-center text-muted py-4">Nenhum dado disponível.</td>
+              </tr>
+              <tr th:each="banco, i : ${equipe}">
+                <td class="text-muted small" th:text="${i.count}">1</td>
+                <td>
+                  <span class="fw-semibold" th:text="${banco.funcionario.nome}">Nome</span>
+                </td>
+                <td>
+                  <span class="text-muted small" th:text="${banco.funcionario.cargo}">—</span>
+                </td>
+                <td class="text-center">
+                  <span th:text="${banco.funcionario.jornadaDiaria} + 'h'">8h</span>
+                </td>
+                <td class="text-center">
+                  <span th:text="${banco.saldoAtualMinutos}">0</span>
+                </td>
+                <td>
+                  <span th:with="mins=${banco.saldoAtualMinutos}"
+                        th:class="${mins > 2400} ? 'bh-semaforo bh-s-critico' : (${mins > 1200} ? 'bh-semaforo bh-s-atencao' : 'bh-semaforo bh-s-ok')"
+                        th:text="${mins / 60} + 'h ' + ${mins % 60} + 'min'">0h</span>
+                </td>
+                <td>
+                  <span class="small text-muted"
+                        th:text="${banco.dataVencimento != null ? #temporals.format(banco.dataVencimento, 'dd/MM/yyyy') : '—'}">—</span>
+                </td>
+                <td>
+                  <span th:with="mins=${banco.saldoAtualMinutos}">
+                    <span th:if="${mins > 2400}" class="bh-semaforo bh-s-critico">Crítico</span>
+                    <span th:if="${mins > 1200 and mins <= 2400}" class="bh-semaforo bh-s-atencao">Atenção</span>
+                    <span th:if="${mins <= 1200}" class="bh-semaforo bh-s-ok">OK</span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script th:src="@{/js/main.js}"></script>
+</body>
+</html>
