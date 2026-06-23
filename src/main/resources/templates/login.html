@@ -54,7 +54,7 @@
       <i class="bi bi-exclamation-circle-fill"></i>
       <span th:text="${mensagemErro}">Erro</span>
     </div>
-    <div th:if="${param.error and not #vars.containsKey('mensagemErro')}"
+    <div th:if="${param.error != null and mensagemErro == null}"
          class="alert alert-danger d-flex align-items-center gap-2 mb-3 py-2 px-3 rounded-3 alert-permanent">
       <i class="bi bi-exclamation-circle-fill"></i>
       <span>E-mail ou senha incorretos.</span>
