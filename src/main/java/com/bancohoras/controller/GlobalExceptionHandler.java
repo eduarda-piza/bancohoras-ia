@@ -6,6 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Tratamento centralizado de exceções para controllers MVC.
@@ -31,6 +32,12 @@ public class GlobalExceptionHandler {
         log.warn("Acesso negado: {}", e.getMessage());
         ra.addFlashAttribute("erro", "Sem permissão de acesso.");
         return "redirect:/dashboard";
+    }
+
+    /** Recursos estáticos não encontrados (favicon, etc.) → 404, sem log de erro. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public String handleNoResource(NoResourceFoundException e) {
+        return "error/404";
     }
 
     /** Qualquer outra exceção inesperada → página 500 simples. */

@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/login",
                     "/health",
+                    "/favicon.ico",
                     "/css/**", "/js/**", "/images/**", "/webjars/**",
                     "/h2-console/**"
                 ).permitAll()

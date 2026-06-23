@@ -20,21 +20,21 @@
     <span class="bh-nav-section">Menu</span>
 
     <a th:href="@{/dashboard}"
-       th:classappend="${#request.requestURI eq '/dashboard'} ? 'active'"
+       th:classappend="${currentUri eq '/dashboard'} ? 'active'"
        class="bh-nav-item">
       <i class="bi bi-speedometer2"></i>
       <span>Visão Geral</span>
     </a>
 
     <a th:href="@{/alertas}"
-       th:classappend="${#request.requestURI eq '/alertas'} ? 'active'"
+       th:classappend="${currentUri eq '/alertas'} ? 'active'"
        class="bh-nav-item">
       <i class="bi bi-bell"></i>
       <span>Alertas</span>
     </a>
 
     <a th:href="@{/aprovacoes}"
-       th:classappend="${#request.requestURI eq '/aprovacoes'} ? 'active'"
+       th:classappend="${currentUri eq '/aprovacoes'} ? 'active'"
        class="bh-nav-item"
        sec:authorize="hasAnyRole('ADMIN','GESTOR','RH')">
       <i class="bi bi-check2-square"></i>
@@ -44,21 +44,21 @@
     <span class="bh-nav-section">Equipe</span>
 
     <a th:href="@{/funcionarios}"
-       th:classappend="${#request.requestURI.startsWith('/funcionarios')} ? 'active'"
+       th:classappend="${currentUri.startsWith('/funcionarios')} ? 'active'"
        class="bh-nav-item">
       <i class="bi bi-bar-chart-line"></i>
       <span>Saldo da Equipe</span>
     </a>
 
     <a th:href="@{/funcionarios}"
-       th:classappend="${#request.requestURI.startsWith('/funcionarios')} ? 'active'"
+       th:classappend="${currentUri.startsWith('/funcionarios')} ? 'active'"
        class="bh-nav-item">
       <i class="bi bi-people"></i>
       <span>Funcionários</span>
     </a>
 
     <a th:href="@{/relatorios}"
-       th:classappend="${#request.requestURI eq '/relatorios'} ? 'active'"
+       th:classappend="${currentUri eq '/relatorios'} ? 'active'"
        class="bh-nav-item"
        sec:authorize="hasAnyRole('ADMIN','GESTOR','RH')">
       <i class="bi bi-file-earmark-bar-graph"></i>
