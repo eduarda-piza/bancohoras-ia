@@ -44,8 +44,8 @@ public class RegistroPonto {
     @Column(nullable = false)
     private boolean sugeridoPelaIA = false;
 
-    /** Horário que a IA sugeriu, ex: "08:02" */
-    @Column(length = 10)
+    /** Horário que a IA sugeriu, ex: "08:00-17:00" */
+    @Column(length = 20)
     private String horarioSugeridoIA;
 
     @Column(columnDefinition = "TEXT")
