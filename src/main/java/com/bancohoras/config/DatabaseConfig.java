@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import javax.sql.DataSource;
+import java.net.URI;
 
 @Configuration
 @Profile("prod")
@@ -19,23 +20,38 @@ public class DatabaseConfig {
 
     @Bean
     @Primary
-    public DataSource dataSource() {
+    public DataSource dataSource() throws Exception {
         if (databaseUrl == null || databaseUrl.isBlank()) {
             throw new IllegalStateException(
                 "DATABASE_URL nao configurada. No Railway, adicione a variavel DATABASE_URL " +
-                "com o valor ${{postgres.DATABASE_URL}} no servico bancohoras-app."
+                "com o valor ${{Postgres.DATABASE_URL}} no servico bancohoras-app."
             );
         }
 
-        String jdbcUrl = databaseUrl;
-        if (!jdbcUrl.startsWith("jdbc:")) {
-            jdbcUrl = "jdbc:" + jdbcUrl;
+        // Normaliza para URI parseable: postgresql:// ou postgres:// → http:// temporariamente
+        String normalized = databaseUrl
+            .replace("postgresql://", "http://")
+            .replace("postgres://", "http://");
+
+        URI uri = URI.create(normalized);
+        String host = uri.getHost();
+        int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+        String database = uri.getPath().replaceFirst("^/", "");
+
+        String username = "";
+        String password = "";
+        if (uri.getUserInfo() != null) {
+            String[] parts = uri.getUserInfo().split(":", 2);
+            username = parts[0];
+            password = parts.length > 1 ? parts[1] : "";
         }
-        // Railway usa postgres:// em vez de postgresql://
-        jdbcUrl = jdbcUrl.replace("jdbc:postgres://", "jdbc:postgresql://");
+
+        String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + "/" + database;
 
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password);
         config.setMaximumPoolSize(5);
         config.setMinimumIdle(2);
         config.setConnectionTimeout(30000);
