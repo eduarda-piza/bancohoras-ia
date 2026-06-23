@@ -32,6 +32,40 @@ public class FuncionarioController {
         return "funcionarios";
     }
 
+    @GetMapping("/novo")
+    public String novoForm(Model model) {
+        model.addAttribute("funcionario", Funcionario.builder()
+            .jornadaDiaria(8).horarioEntrada("09:00").horarioSaida("18:00").intervalo("1h").build());
+        model.addAttribute("pageTitle", "Novo Funcionário");
+        return "funcionarios/novo";
+    }
+
+    @PostMapping("/novo")
+    public String salvarNovo(@RequestParam String nome,
+                              @RequestParam String cargo,
+                              @RequestParam(required = false) String email,
+                              @RequestParam(defaultValue = "8") int jornadaDiaria,
+                              @RequestParam(defaultValue = "09:00") String horarioEntrada,
+                              @RequestParam(defaultValue = "18:00") String horarioSaida,
+                              @RequestParam(defaultValue = "1h") String intervalo,
+                              RedirectAttributes ra) {
+        try {
+            Funcionario f = Funcionario.builder()
+                .nome(nome.trim()).cargo(cargo.trim())
+                .email(email != null && !email.isBlank() ? email.trim().toLowerCase() : null)
+                .jornadaDiaria(jornadaDiaria)
+                .horarioEntrada(horarioEntrada).horarioSaida(horarioSaida)
+                .intervalo(intervalo).ativo(true)
+                .build();
+            Funcionario salvo = funcionarioService.salvar(f);
+            ra.addFlashAttribute("sucesso", "Funcionário " + salvo.getNome() + " cadastrado com sucesso.");
+            return "redirect:/funcionarios/" + salvo.getId();
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao cadastrar: " + e.getMessage());
+            return "redirect:/funcionarios/novo";
+        }
+    }
+
     @GetMapping("/{id}")
     public String detalhe(@PathVariable UUID id, Model model) {
         Funcionario funcionario = funcionarioService.buscarPorId(id)

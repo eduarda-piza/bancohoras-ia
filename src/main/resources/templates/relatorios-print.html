@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Relatório de Banco de Horas</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; color: #333; }
+    h1 { font-size: 18px; color: #042C53; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 11px; margin-bottom: 20px; }
+    .summary { display: flex; gap: 20px; margin-bottom: 20px; }
+    .summary-box { border: 1px solid #ccc; padding: 10px 16px; border-radius: 6px; text-align: center; flex: 1; }
+    .summary-box .val { font-size: 22px; font-weight: bold; }
+    .summary-box .lbl { font-size: 10px; color: #666; text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    thead th { background: #042C53; color: white; padding: 6px 10px; text-align: left; font-size: 11px; }
+    tbody td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+    tbody tr:nth-child(even) { background: #f8f9fa; }
+    .critico { color: #dc3545; font-weight: bold; }
+    .atencao { color: #b45309; font-weight: bold; }
+    .ok      { color: #198754; font-weight: bold; }
+    .ai-box { border: 1px solid #b8d9f8; background: #e8f4ff; padding: 10px 14px; border-radius: 6px; margin-bottom: 20px; }
+    .ai-box strong { color: #1a6fc4; }
+    @media print {
+      button { display: none; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print" style="margin-bottom:16px;">
+    <button onclick="window.print()" style="background:#1a6fc4;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;">
+      Imprimir / Salvar como PDF
+    </button>
+    <a href="/relatorios" style="margin-left:12px;font-size:12px;color:#666;">Voltar</a>
+  </div>
+
+  <h1>Relatório de Banco de Horas</h1>
+  <p class="subtitle" th:text="'Gerado em: ' + ${#temporals.format(agora, 'dd/MM/yyyy HH:mm')}">Gerado em: --</p>
+
+  <div class="ai-box">
+    <strong>Resumo Semanal da IA:</strong>
+    Semana 23-27/03: 2 excessos de jornada detectados, 1 correção aplicada automaticamente, 3 funcionários com saldo em zona crítica.
+  </div>
+
+  <div class="summary">
+    <div class="summary-box">
+      <div class="val" th:text="${#lists.size(equipe)}">0</div>
+      <div class="lbl">Total Funcionários</div>
+    </div>
+    <div class="summary-box">
+      <div class="val critico" th:text="${totalCriticos}">0</div>
+      <div class="lbl">Críticos (&gt;40h)</div>
+    </div>
+    <div class="summary-box">
+      <div class="val ok" th:text="${totalOk}">0</div>
+      <div class="lbl">No Prazo</div>
+    </div>
+    <div class="summary-box">
+      <div class="val" th:text="${totalSaldoHoras} + 'h'">0h</div>
+      <div class="lbl">Total Saldo Equipe</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Funcionário</th>
+        <th>Cargo</th>
+        <th>Jornada</th>
+        <th>Saldo (min)</th>
+        <th>Saldo (horas)</th>
+        <th>Vencimento</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="banco, i : ${equipe}">
+        <td th:text="${i.count}">1</td>
+        <td th:text="${banco.funcionario.nome}">Nome</td>
+        <td th:text="${banco.funcionario.cargo}">Cargo</td>
+        <td th:text="${banco.funcionario.jornadaDiaria} + 'h'">8h</td>
+        <td th:text="${banco.saldoAtualMinutos}">0</td>
+        <td th:with="mins=${banco.saldoAtualMinutos}"
+            th:class="${mins > 2400} ? 'critico' : (${mins > 1200} ? 'atencao' : 'ok')"
+            th:text="${mins / 60} + 'h ' + ${mins % 60} + 'min'">0h</td>
+        <td th:text="${banco.dataVencimento != null ? #temporals.format(banco.dataVencimento, 'dd/MM/yyyy') : '—'}">—</td>
+        <td th:with="mins=${banco.saldoAtualMinutos}">
+          <span th:if="${mins > 2400}" class="critico">Crítico</span>
+          <span th:if="${mins > 1200 and mins <= 2400}" class="atencao">Atenção</span>
+          <span th:if="${mins <= 1200}" class="ok">OK</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

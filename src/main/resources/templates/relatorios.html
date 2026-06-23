@@ -19,9 +19,9 @@
 
     <main class="bh-content">
 
-      <!-- Sumário executivo -->
+      <!-- Cards de sumário -->
       <div class="row g-3 mb-4">
-        <div class="col-sm-4">
+        <div class="col-md-4">
           <div class="bh-card text-center">
             <div class="bh-metric-icon mx-auto" style="background:#eff6ff;">
               <i class="bi bi-people-fill text-primary"></i>
@@ -30,28 +30,59 @@
             <div class="bh-metric-label">Total Funcionários</div>
           </div>
         </div>
-        <div class="col-sm-4">
-          <div class="bh-card text-center">
+        <div class="col-md-4">
+          <div class="bh-card text-center border-danger">
             <div class="bh-metric-icon mx-auto" style="background:#fef2f2;">
               <i class="bi bi-exclamation-triangle-fill text-danger"></i>
             </div>
-            <div class="bh-metric-value text-danger" th:text="${totalCriticos}">0</div>
-            <div class="bh-metric-label">Saldos Críticos</div>
+            <div class="bh-metric-value text-danger" th:text="${totalCriticos != null ? totalCriticos : 0}">0</div>
+            <div class="bh-metric-label">Funcionários Críticos (&gt;40h)</div>
           </div>
         </div>
-        <div class="col-sm-4">
-          <div class="bh-card text-center">
+        <div class="col-md-4">
+          <div class="bh-card text-center border-success">
             <div class="bh-metric-icon mx-auto" style="background:#f0fdf4;">
-              <i class="bi bi-bar-chart-fill text-success"></i>
+              <i class="bi bi-check-circle-fill text-success"></i>
             </div>
-            <div class="bh-metric-value text-success" th:text="${totalSaldoHoras} + 'h'">0h</div>
-            <div class="bh-metric-label">Total Saldo Equipe</div>
+            <div class="bh-metric-value text-success" th:text="${totalOk != null ? totalOk : 0}">0</div>
+            <div class="bh-metric-label">Funcionários no Prazo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo Semanal IA -->
+      <div class="card border-0 shadow-sm mb-4 border-start border-primary border-3">
+        <div class="card-body">
+          <h6><i class="bi bi-robot me-2"></i>Resumo Semanal da IA</h6>
+          <p class="mb-0 text-muted">Semana 23-27/03: 2 excessos de jornada detectados, 1 correção aplicada automaticamente, 3 funcionários com saldo em zona crítica.</p>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+          <div class="bh-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Saldo por Funcionário</h6>
+              <a th:href="@{/relatorios/pdf}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                <i class="bi bi-printer me-1"></i>Imprimir / PDF
+              </a>
+            </div>
+            <canvas id="chartSaldos" height="200"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="bh-card h-100 d-flex flex-column">
+            <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Status da Equipe</h6>
+            <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+              <canvas id="chartStatus" style="max-height:200px;"></canvas>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Tabela consolidada -->
-      <div class="bh-table-card">
+      <div class="bh-table-card mb-4">
         <div class="bh-table-header">
           <span class="bh-table-title">
             <i class="bi bi-file-earmark-bar-graph me-1 text-primary"></i>Consolidado de Saldos
@@ -76,7 +107,8 @@
               <tr th:if="${#lists.isEmpty(equipe)}">
                 <td colspan="8" class="text-center text-muted py-4">Nenhum dado disponível.</td>
               </tr>
-              <tr th:each="banco, i : ${equipe}">
+              <tr th:each="banco, i : ${equipe}"
+                  th:class="${banco.saldoAtualMinutos > 2400} ? 'row-critico' : (${banco.saldoAtualMinutos > 1200} ? 'row-atencao' : '')">
                 <td class="text-muted small" th:text="${i.count}">1</td>
                 <td>
                   <span class="fw-semibold" th:text="${banco.funcionario.nome}">Nome</span>
@@ -112,10 +144,128 @@
         </div>
       </div>
 
+      <!-- Histórico de resumos -->
+      <div class="bh-table-card">
+        <div class="bh-table-header">
+          <span class="bh-table-title">
+            <i class="bi bi-clock-history me-1 text-primary"></i>Histórico de Resumos
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Excessos Detectados</th>
+                <th>Correções Aplicadas</th>
+                <th>Saldo Médio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>23/03 – 27/03/2025</td>
+                <td><span class="badge bg-warning text-dark">2</span></td>
+                <td><span class="badge bg-success">1</span></td>
+                <td>+22h</td>
+                <td><span class="bh-semaforo bh-s-atencao">Atenção</span></td>
+              </tr>
+              <tr>
+                <td>16/03 – 21/03/2025</td>
+                <td><span class="badge bg-danger">4</span></td>
+                <td><span class="badge bg-success">3</span></td>
+                <td>+25h</td>
+                <td><span class="bh-semaforo bh-s-critico">Crítico</span></td>
+              </tr>
+              <tr>
+                <td>09/03 – 14/03/2025</td>
+                <td><span class="badge bg-secondary">1</span></td>
+                <td><span class="badge bg-success">1</span></td>
+                <td>+18h</td>
+                <td><span class="bh-semaforo bh-s-ok">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script th:src="@{/js/main.js}"></script>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    (function() {
+      var equipe = /*[[${equipe}]]*/ [];
+      var nomes = [];
+      var saldosH = [];
+      var cores = [];
+      var statusCritico = 0, statusAtencao = 0, statusOk = 0;
+
+      /*[# th:each="banco : ${equipe}"]*/
+        var mins = /*[[${banco.saldoAtualMinutos}]]*/ 0;
+        var nome = /*[[${banco.funcionario.nome}]]*/ '';
+        nomes.push(nome);
+        saldosH.push(Math.round(mins / 60 * 10) / 10);
+        if (mins > 2400) {
+          cores.push('rgba(220,53,69,0.8)');
+          statusCritico++;
+        } else if (mins > 1200) {
+          cores.push('rgba(255,193,7,0.8)');
+          statusAtencao++;
+        } else {
+          cores.push('rgba(25,135,84,0.8)');
+          statusOk++;
+        }
+      /*[/]*/
+
+      // Bar chart
+      var ctx1 = document.getElementById('chartSaldos').getContext('2d');
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: nomes,
+          datasets: [{
+            label: 'Saldo (horas)',
+            data: saldosH,
+            backgroundColor: cores,
+            borderColor: cores.map(c => c.replace('0.8', '1')),
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Horas' } }
+          }
+        }
+      });
+
+      // Doughnut chart
+      var ctx2 = document.getElementById('chartStatus').getContext('2d');
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Crítico', 'Atenção', 'OK'],
+          datasets: [{
+            data: [statusCritico, statusAtencao, statusOk],
+            backgroundColor: ['rgba(220,53,69,0.85)', 'rgba(255,193,7,0.85)', 'rgba(25,135,84,0.85)'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    })();
+    /*]]>*/
+  </script>
 </body>
 </html>

@@ -2,26 +2,39 @@
    BancoHoras – design system
    ============================================================ */
 
+/* ---------- Google Fonts ---------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* ---------- Reset / base ---------------------------------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --sb-bg:        #0d1b2a;
-  --sb-active:    #2563eb;
-  --sb-text:      #94a3b8;
-  --sb-hover-bg:  rgba(255,255,255,.07);
-  --sb-hover-txt: #e2e8f0;
-  --sb-width:     240px;
-  --topbar-h:     60px;
-  --body-bg:      #f1f5f9;
-  --card-bg:      #ffffff;
-  --border:       #e2e8f0;
-  --primary:      #2563eb;
-  --success:      #16a34a;
-  --warning:      #b45309;
-  --danger:       #dc2626;
-  --txt-main:     #0f172a;
-  --txt-muted:    #64748b;
+  --sb-bg:           #0d1b2a;
+  --sb-active:       #2563eb;
+  --sb-text:         #94a3b8;
+  --sb-hover-bg:     rgba(255,255,255,.07);
+  --sb-hover-txt:    #e2e8f0;
+  --sb-width:        240px;
+  --topbar-h:        60px;
+  --body-bg:         #f1f5f9;
+  --card-bg:         #ffffff;
+  --border:          #e2e8f0;
+  --primary:         #2563eb;
+  --success:         #16a34a;
+  --warning:         #b45309;
+  --danger:          #dc2626;
+  --txt-main:        #0f172a;
+  --txt-muted:       #64748b;
+
+  /* BancoHoras theme tokens */
+  --bh-sidebar-bg:   #042C53;
+  --bh-primary:      #1a6fc4;
+  --bh-primary-light:#e8f4ff;
+  --bh-danger:       #dc3545;
+  --bh-warning:      #ffc107;
+  --bh-success:      #198754;
+  --bh-topbar-bg:    #ffffff;
+  --bh-card-shadow:  0 2px 8px rgba(0,0,0,.08);
 }
 
 body {
@@ -326,3 +339,24 @@ body {
   .bh-login-brand   { display: none; }
   .bh-login-form-area { width: 100%; }
 }
+
+/* ---------- Status badges (semáforo) ---------------------- */
+.badge-critico { background: #dc3545; color: white; }
+.badge-atencao { background: #ffc107; color: #212529; }
+.badge-ok      { background: #198754; color: white; }
+
+/* ---------- Status dot (semáforo em tabelas) -------------- */
+.status-dot          { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.status-dot.critico  { background: #dc3545; }
+.status-dot.atencao  { background: #ffc107; }
+.status-dot.ok       { background: #198754; }
+
+/* ---------- Table row highlighting ----------------------- */
+.row-critico { background-color: #fff5f5 !important; }
+.row-atencao { background-color: #fffbf0 !important; }
+
+/* ---------- Override card border-radius for Bootstrap cards */
+.card { border-radius: 12px !important; }
+
+/* ---------- Topbar override for bh-topbar ---------------- */
+.bh-topbar { background: white; box-shadow: 0 1px 4px rgba(0,0,0,.08); }

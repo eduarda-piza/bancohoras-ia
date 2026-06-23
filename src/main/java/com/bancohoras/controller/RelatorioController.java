@@ -25,13 +25,31 @@ public class RelatorioController {
         List<BancoHoras> equipe = bancoHorasRepository.findAllWithFuncionario();
 
         long totalCriticos  = equipe.stream().filter(b -> b.getSaldoAtualMinutos() > 2400).count();
+        long totalOk        = equipe.stream().filter(b -> b.getSaldoAtualMinutos() <= 1200).count();
+        int  totalSaldoMins = equipe.stream().mapToInt(BancoHoras::getSaldoAtualMinutos).sum();
+
+        model.addAttribute("equipe",          equipe);
+        model.addAttribute("totalCriticos",   totalCriticos);
+        model.addAttribute("totalOk",         totalOk);
+        model.addAttribute("totalSaldoHoras", totalSaldoMins / 60);
+        model.addAttribute("totalHorasEquipe", totalSaldoMins / 60);
+        model.addAttribute("agora",           java.time.LocalDateTime.now());
+        model.addAttribute("pageTitle",       "Relatórios");
+        return "relatorios";
+    }
+
+    @GetMapping("/pdf")
+    public String pdf(Model model) {
+        List<BancoHoras> equipe = bancoHorasRepository.findAllWithFuncionario();
+        long totalCriticos  = equipe.stream().filter(b -> b.getSaldoAtualMinutos() > 2400).count();
+        long totalOk        = equipe.stream().filter(b -> b.getSaldoAtualMinutos() <= 1200).count();
         int  totalSaldoMins = equipe.stream().mapToInt(BancoHoras::getSaldoAtualMinutos).sum();
 
         model.addAttribute("equipe",         equipe);
         model.addAttribute("totalCriticos",  totalCriticos);
+        model.addAttribute("totalOk",        totalOk);
         model.addAttribute("totalSaldoHoras", totalSaldoMins / 60);
         model.addAttribute("agora",          java.time.LocalDateTime.now());
-        model.addAttribute("pageTitle",      "Relatórios");
-        return "relatorios";
+        return "relatorios-print";
     }
 }

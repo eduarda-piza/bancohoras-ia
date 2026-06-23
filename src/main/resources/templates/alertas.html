@@ -31,7 +31,7 @@
 
       <!-- Cabeçalho -->
       <div class="d-flex align-items-center justify-content-between mb-3">
-        <h5 class="fw-bold mb-0">Notificações</h5>
+        <h5 class="fw-bold mb-0">Alertas e Notificações</h5>
         <form th:action="@{/alertas/marcar-todas-lidas}" method="post">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <button type="submit" class="btn btn-outline-secondary btn-sm">
@@ -40,8 +40,120 @@
         </form>
       </div>
 
-      <!-- Lista -->
+      <!-- ── Seção 1: Horas a Vencer ──────────────────────────── -->
+      <div class="bh-table-card mb-4">
+        <div class="bh-table-header">
+          <span class="bh-table-title">
+            <i class="bi bi-clock-fill text-danger me-1"></i>Horas a Vencer
+          </span>
+          <span class="text-muted small">Funcionários com saldo acima de 20h</span>
+        </div>
+        <div th:if="${horasVencer == null or #lists.isEmpty(horasVencer)}"
+             class="text-center text-muted py-4">
+          <i class="bi bi-check2-circle d-block fs-2 mb-2 text-success"></i>
+          Nenhuma hora a vencer no momento.
+        </div>
+        <div class="table-responsive" th:if="${horasVencer != null and !#lists.isEmpty(horasVencer)}">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Funcionário</th>
+                <th>Cargo</th>
+                <th>Saldo</th>
+                <th>Vencimento</th>
+                <th>Dias Restantes</th>
+                <th class="text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="banco : ${horasVencer}">
+                <td class="fw-semibold" th:text="${banco.funcionario.nome}">Nome</td>
+                <td class="text-muted small" th:text="${banco.funcionario.cargo}">Cargo</td>
+                <td>
+                  <span th:with="mins=${banco.saldoAtualMinutos}"
+                        th:class="${mins > 2400} ? 'bh-semaforo bh-s-critico' : 'bh-semaforo bh-s-atencao'"
+                        th:text="${mins / 60} + 'h ' + ${mins % 60} + 'min'">0h</span>
+                </td>
+                <td class="small text-muted"
+                    th:text="${banco.dataVencimento != null ? #temporals.format(banco.dataVencimento, 'dd/MM/yyyy') : '—'}">—</td>
+                <td th:with="dias=${diasRestantesMap != null ? diasRestantesMap[banco.id] : null}">
+                  <span th:if="${dias != null and dias < 15}"
+                        class="badge bg-danger" th:text="${dias} + ' dias'">0 dias</span>
+                  <span th:if="${dias != null and dias >= 15 and dias < 30}"
+                        class="badge bg-warning text-dark" th:text="${dias} + ' dias'">0 dias</span>
+                  <span th:if="${dias != null and dias >= 30}"
+                        class="badge bg-success" th:text="${dias} + ' dias'">0 dias</span>
+                  <span th:if="${dias == null}" class="text-muted small">—</span>
+                </td>
+                <td class="text-center">
+                  <a th:href="@{/funcionarios/{id}(id=${banco.funcionario.id})}"
+                     class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.78rem;">
+                    <i class="bi bi-calendar-check me-1"></i>Sugerir folga
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Seção 2: Excesso de Jornada ──────────────────────── -->
+      <div class="bh-table-card mb-4">
+        <div class="bh-table-header">
+          <span class="bh-table-title">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Excesso de Jornada
+          </span>
+          <span class="text-muted small">Registros com duração acima de 8h</span>
+        </div>
+        <div th:if="${excessoJornada == null or #lists.isEmpty(excessoJornada)}"
+             class="text-center text-muted py-4">
+          <i class="bi bi-check2-circle d-block fs-2 mb-2 text-success"></i>
+          Nenhum excesso de jornada detectado.
+        </div>
+        <div class="table-responsive" th:if="${excessoJornada != null and !#lists.isEmpty(excessoJornada)}">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Funcionário</th>
+                <th>Data</th>
+                <th>Trabalhadas</th>
+                <th>Limite</th>
+                <th>Excedido</th>
+                <th class="text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="reg : ${excessoJornada}">
+                <td class="fw-semibold" th:text="${reg.funcionario.nome}">Nome</td>
+                <td class="small" th:text="${#temporals.format(reg.entrada, 'dd/MM/yyyy')}">Data</td>
+                <td>
+                  <span class="bh-semaforo bh-s-atencao"
+                        th:text="${reg.duracaoMinutos / 60} + 'h ' + ${reg.duracaoMinutos % 60} + 'min'">0h</span>
+                </td>
+                <td class="small text-muted">8h</td>
+                <td>
+                  <span class="text-danger fw-semibold"
+                        th:text="'+' + ${(reg.duracaoMinutos - 480) / 60} + 'h ' + ${(reg.duracaoMinutos - 480) % 60} + 'min'">+0h</span>
+                </td>
+                <td class="text-center">
+                  <a th:href="@{/funcionarios/{id}(id=${reg.funcionario.id})}"
+                     class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:.78rem;">
+                    <i class="bi bi-telephone me-1"></i>Acionar RH
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Seção 3: Notificações ─────────────────────────────── -->
       <div class="bh-table-card">
+        <div class="bh-table-header">
+          <span class="bh-table-title">
+            <i class="bi bi-bell me-1 text-primary"></i>Notificações
+          </span>
+        </div>
 
         <div th:if="${notificacoes == null or #lists.isEmpty(notificacoes)}"
              class="text-center text-muted py-5">

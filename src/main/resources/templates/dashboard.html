@@ -144,11 +144,20 @@
                       </span>
                     </td>
                     <td>
-                      <a th:href="@{/funcionarios/{id}(id=${banco.funcionario.id})}"
-                         class="btn btn-sm btn-ghost btn-outline-secondary py-0 px-2"
-                         style="font-size:.78rem;">
-                        <i class="bi bi-eye"></i>
-                      </a>
+                      <div class="d-flex gap-1">
+                        <a th:href="@{/funcionarios/{id}(id=${banco.funcionario.id})}"
+                           class="btn btn-sm btn-ghost btn-outline-secondary py-0 px-2"
+                           style="font-size:.78rem;">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <a th:if="${banco.saldoAtualMinutos > 1200}"
+                           th:href="@{/funcionarios/{id}(id=${banco.funcionario.id})}"
+                           class="btn btn-sm btn-outline-primary py-0 px-2"
+                           style="font-size:.78rem;"
+                           title="Sugerir folga">
+                          <i class="bi bi-calendar-check"></i>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -158,6 +167,88 @@
         </div>
 
       </div><!-- /row -->
+
+      <!-- ── Alertas Recentes (full-width) ──────────────────── -->
+      <div class="row g-3 mb-4 mt-0">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0"><i class="bi bi-bell-fill text-warning me-2"></i>Alertas Recentes</h6>
+              <a th:href="@{/alertas}" class="btn btn-sm btn-outline-secondary">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+              <div class="list-group list-group-flush" th:if="${alertasRecentes != null and !#lists.isEmpty(alertasRecentes)}">
+                <div th:each="alerta : ${alertasRecentes}"
+                     class="list-group-item list-group-item-action border-0 py-3 px-4">
+                  <div class="d-flex align-items-start gap-3">
+                    <span th:class="${alerta.tipo.name() == 'VENCIMENTO'} ? 'badge bg-danger p-2' : (${alerta.tipo.name() == 'EXCESSO_JORNADA'} ? 'badge bg-warning text-dark p-2' : 'badge bg-info p-2')">
+                      <i th:class="${alerta.tipo.name() == 'VENCIMENTO'} ? 'bi bi-clock-fill' : (${alerta.tipo.name() == 'EXCESSO_JORNADA'} ? 'bi bi-exclamation-triangle-fill' : 'bi bi-info-circle-fill')"></i>
+                    </span>
+                    <div class="flex-grow-1">
+                      <p class="mb-0 small" th:text="${alerta.mensagem}">mensagem</p>
+                      <small class="text-muted" th:text="${#temporals.format(alerta.dataCriacao, 'dd/MM/yyyy HH:mm')}">data</small>
+                    </div>
+                    <span th:if="${!alerta.lida}" class="badge bg-primary rounded-pill">Novo</span>
+                  </div>
+                </div>
+              </div>
+              <p th:if="${alertasRecentes == null or #lists.isEmpty(alertasRecentes)}" class="text-muted small p-3 mb-0">Nenhum alerta recente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Aprovações Pendentes (full-width) ──────────────── -->
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0"><i class="bi bi-check2-square text-primary me-2"></i>Aprovações Pendentes</h6>
+              <a th:href="@{/aprovacoes}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive" th:if="${aprovacoesPendentes != null and !#lists.isEmpty(aprovacoesPendentes)}">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-4">Funcionário</th>
+                      <th>Data</th>
+                      <th>Observação</th>
+                      <th>Sugestão IA</th>
+                      <th class="text-center">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="reg : ${aprovacoesPendentes}">
+                      <td class="ps-4 fw-semibold" th:text="${reg.funcionario.nome}">Nome</td>
+                      <td th:text="${#temporals.format(reg.entrada, 'dd/MM/yyyy')}">Data</td>
+                      <td><small th:text="${reg.observacao != null ? reg.observacao : '-'}">obs</small></td>
+                      <td>
+                        <span th:if="${reg.sugeridoPelaIA}" class="badge"
+                              style="background:#e8f4ff;color:#1a6fc4;border:1px solid #b8d9f8;font-weight:600;"
+                              th:text="${reg.horarioSugeridoIA != null ? reg.horarioSugeridoIA : 'IA'}">IA</span>
+                        <span th:if="${!reg.sugeridoPelaIA}" class="text-muted small">-</span>
+                      </td>
+                      <td class="text-center">
+                        <form th:action="@{/aprovacoes/{id}/aprovar(id=${reg.id})}" method="post" class="d-inline">
+                          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                          <button class="btn btn-success btn-sm">&#10003;</button>
+                        </form>
+                        <form th:action="@{/aprovacoes/{id}/rejeitar(id=${reg.id})}" method="post" class="d-inline">
+                          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                          <button class="btn btn-danger btn-sm">&#10007;</button>
+                        </form>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p th:if="${aprovacoesPendentes == null or #lists.isEmpty(aprovacoesPendentes)}" class="text-muted small p-3 mb-0">Nenhuma aprovação pendente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main><!-- /content -->
   </div><!-- /main -->
 

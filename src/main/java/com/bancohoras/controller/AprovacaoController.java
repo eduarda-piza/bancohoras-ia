@@ -21,8 +21,10 @@ public class AprovacaoController {
 
     @GetMapping
     public String listar(Model model) {
-        model.addAttribute("pendentes",  registroPontoService.listarPendentes());
-        model.addAttribute("pageTitle",  "Aprovações");
+        var pendentes = registroPontoService.listarPendentes();
+        model.addAttribute("pendentes",     pendentes);
+        model.addAttribute("totalPendentes", pendentes.size());
+        model.addAttribute("pageTitle",     "Aprovações");
         return "aprovacoes";
     }
 

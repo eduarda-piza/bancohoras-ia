@@ -49,16 +49,20 @@ public class DashboardController {
             naoLidas        = notificacaoRepository.countByDestinatarioIdAndLidaFalse(uid);
             alertasRecentes = notificacaoRepository
                 .findByDestinatarioIdOrderByDataCriacaoDesc(uid)
-                .stream().limit(5).toList();
+                .stream().limit(4).toList();
         }
 
-        model.addAttribute("totalAtivos",    totalAtivos);
-        model.addAttribute("totalCriticos",  totalCriticos);
-        model.addAttribute("totalPendentes", pendentes.size());
-        model.addAttribute("naoLidas",       naoLidas);
-        model.addAttribute("equipe",         equipe);
-        model.addAttribute("alertas",        alertasRecentes);
-        model.addAttribute("pageTitle",      "Visão Geral");
+        List<RegistroPonto> aprovacoesPendentes = pendentes.stream().limit(3).toList();
+
+        model.addAttribute("totalAtivos",          totalAtivos);
+        model.addAttribute("totalCriticos",        totalCriticos);
+        model.addAttribute("totalPendentes",       pendentes.size());
+        model.addAttribute("naoLidas",             naoLidas);
+        model.addAttribute("equipe",               equipe);
+        model.addAttribute("alertas",              alertasRecentes);
+        model.addAttribute("alertasRecentes",      alertasRecentes);
+        model.addAttribute("aprovacoesPendentes",  aprovacoesPendentes);
+        model.addAttribute("pageTitle",            "Visão Geral");
         return "dashboard";
     }
 }

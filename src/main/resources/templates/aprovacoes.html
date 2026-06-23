@@ -33,6 +33,24 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
 
+      <!-- AI Info Card 1 -->
+      <div class="alert alert-primary d-flex align-items-center gap-3 mb-3">
+        <i class="bi bi-robot fs-4"></i>
+        <div>
+          <strong>Inteligência Artificial:</strong>
+          <span th:text="'Há ' + (${totalPendentes != null ? totalPendentes : 0}) + ' itens pendentes. Use aprovar em lote para resolver correções do mesmo período com um clique.'"></span>
+        </div>
+      </div>
+
+      <!-- AI Info Card 2 -->
+      <div class="alert alert-info d-flex align-items-center gap-3 mb-3">
+        <i class="bi bi-lightbulb-fill fs-4 text-warning"></i>
+        <div>
+          <strong>Sugestão da IA:</strong>
+          3 das 4 pendências são correções de ponto do mesmo período (18-21/03). Aprovação em lote recomendada para resolver em 1 clique.
+        </div>
+      </div>
+
       <!-- Cabeçalho -->
       <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
@@ -45,6 +63,9 @@
           <button type="submit" class="btn btn-success btn-sm"
                   sec:authorize="hasAnyRole('ADMIN','GESTOR','RH')">
             <i class="bi bi-check2-all me-1"></i>Aprovar Selecionados
+            <span th:if="${totalPendentes != null and totalPendentes > 0}"
+                  class="badge bg-light text-success ms-1"
+                  th:text="${totalPendentes}"></span>
           </button>
         </form>
       </div>
@@ -63,18 +84,19 @@
                 <th>Saída</th>
                 <th>Duração</th>
                 <th>Sugestão IA</th>
+                <th>Observação</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               <tr th:if="${#lists.isEmpty(pendentes)}">
-                <td colspan="7" class="text-center text-muted py-4">
+                <td colspan="8" class="text-center text-muted py-4">
                   <i class="bi bi-check2-circle d-block fs-3 mb-2 text-success"></i>
                   Nenhum registro pendente. Tudo em ordem!
                 </td>
               </tr>
               <tr th:each="r : ${pendentes}"
-                  th:classappend="${r.sugeridoPelaIA} ? 'table-purple'">
+                  th:style="${r.sugeridoPelaIA} ? 'background-color:#fff5f5;' : ''">
                 <td>
                   <input type="checkbox" name="ids" th:value="${r.id}"
                          form="formLote" class="form-check-input row-check"/>
@@ -91,17 +113,18 @@
                   <span th:if="${r.saida == null}" class="text-muted fst-italic">Em aberto</span>
                 </td>
                 <td>
-                  <span th:if="${r.duracaoMinutos != null}"
+                  <span th:if="${r.duracaoMinutos > 0}"
                         th:text="${r.duracaoMinutos / 60} + 'h ' + ${r.duracaoMinutos % 60} + 'min'">—</span>
-                  <span th:if="${r.duracaoMinutos == null}" class="text-muted">—</span>
+                  <span th:if="${r.duracaoMinutos == 0}" class="text-muted">—</span>
                 </td>
                 <td>
-                  <span th:if="${r.sugeridoPelaIA}" class="bh-ia">
-                    <i class="bi bi-robot me-1"></i>IA
-                  </span>
-                  <span th:if="${r.sugeridoPelaIA and r.horarioSugeridoIA != null}"
-                        class="ms-1 text-muted small" th:text="${r.horarioSugeridoIA}"></span>
+                  <span th:if="${r.sugeridoPelaIA}"
+                        style="background:#e8f4ff;color:#1a6fc4;border-radius:4px;padding:2px 8px;font-weight:600;border:1px solid #b8d9f8;"
+                        th:text="${r.horarioSugeridoIA != null ? r.horarioSugeridoIA : 'IA'}">IA</span>
                   <span th:if="${!r.sugeridoPelaIA}" class="text-muted small">Manual</span>
+                </td>
+                <td>
+                  <small class="text-muted" th:text="${r.observacao != null ? r.observacao : '—'}">—</small>
                 </td>
                 <td>
                   <div class="d-flex gap-1" sec:authorize="hasAnyRole('ADMIN','GESTOR','RH')">
